@@ -1,10 +1,20 @@
 package entidades;
 
+import java.util.List;
+
 public class Empleado {
-	Integer legajo;
-	String nombre;
-	Empleado(Integer legajo,String nombre){
-		this.legajo = legajo;
-		this.nombre =nombre;
+	public Integer legajo;
+	public Integer retraso;
+	public String nombre;
+	public List<String> tareas;
+	private Double valor;
+	Empleado(String nombre, Double valor){
+		this.valor = valor;
+		this.nombre = nombre;
+		this.retraso = 0 ;
+	
+	}
+	public void asignarTarea(String tarea){
+		this.tareas.add(tarea);
 	}
 }

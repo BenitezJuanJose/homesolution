@@ -4,35 +4,49 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HomeSolution implements IHomeSolution{
-	private Integer ID = 0;
-	private List <Tupla <Integer, String>> empleados = new ArrayList<>();
+	private Integer IdEmpleado = 0;
+	private Integer numeroProyecto = 0 ;
+	private List <Tupla <Integer, Empleado>> empleados = new ArrayList<>();
+	private List <Tupla <Integer, Proyecto>> proyectos = new ArrayList<>();
 
 	@Override
 	public void registrarEmpleado(String nombre, double valor) throws IllegalArgumentException {
 		// TODO Auto-generated method stub
-		
-		empleados.add(new Tupla<>(ID,nombre));
-		ID++;
+		Empleado empleado = new Empleado(nombre,valor);
+		empleado.legajo=IdEmpleado;
+		empleados.add(new Tupla<>(IdEmpleado,empleado));
+		IdEmpleado++;
 		
 	}
 
 	@Override
 	public void registrarEmpleado(String nombre, double valor, String categoria) throws IllegalArgumentException {
-		empleados.add(new Tupla<>(ID,nombre));
-		ID++;
+		Empleado empleado = new Empleado(nombre,valor);
+		empleados.add(new Tupla<>(IdEmpleado,empleado));
+		IdEmpleado++;
 		
 	}
 
 	@Override
 	public void registrarProyecto(String[] titulos, String[] descripcion, double[] dias, String domicilio,
 			String[] cliente, String inicio, String fin) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
+		
+			Proyecto proyecto = new Proyecto(titulos, descripcion, dias, domicilio, cliente, inicio, fin);
+			proyectos.add(new Tupla<>(numeroProyecto,proyecto));
+			numeroProyecto++;
+			
 		
 	}
 
 	@Override
 	public void asignarResponsableEnTarea(Integer numero, String titulo) throws Exception {
 		// TODO Auto-generated method stub
+		for(Tupla<Integer, Empleado> e : empleados) {
+			Empleado empleado = e.getValor2();
+			if(empleado.legajo == numero) {
+				empleado.asignarTarea(titulo);
+			}
+		}
 		
 	}
 
@@ -88,26 +102,46 @@ public class HomeSolution implements IHomeSolution{
 
 	@Override
 	public List<Tupla<Integer, String>> proyectosFinalizados() {
-		// TODO Auto-generated method stub
-		return null;
+		List<Tupla<Integer,String>> finalizados = new ArrayList<>();
+		for(Tupla<Integer, Proyecto> p : proyectos) {
+			if(p.getValor2().estado.equals("ACTIVOS")) {
+				finalizados.add(new Tupla<>(p.getValor1(),p.getValor2().titulos[0]));
+			}
+		}
+		return finalizados;
 	}
 
 	@Override
 	public List<Tupla<Integer, String>> proyectosPendientes() {
-		// TODO Auto-generated method stub
-		return null;
+		List<Tupla<Integer,String>> pendientes = new ArrayList<>();
+		for(Tupla<Integer, Proyecto> p : proyectos) {
+			if(p.getValor2().estado.equals("PENDIENTE")) {
+				pendientes.add(new Tupla<>(p.getValor1(),p.getValor2().titulos[0]));
+			}
+		}
+		return pendientes;
 	}
 
 	@Override
 	public List<Tupla<Integer, String>> proyectosActivos() {
-		// TODO Auto-generated method stub
-		return null;
+		List<Tupla<Integer,String>> activos = new ArrayList<>();
+		for(Tupla<Integer, Proyecto> p : proyectos) {
+			if(p.getValor2().estado.equals("ACTIVOS")) {
+				activos.add(new Tupla<>(p.getValor1(),p.getValor2().titulos[0]));
+			}
+		}
+		return activos;
 	}
 
 	@Override
 	public Object[] empleadosNoAsignados() {
-		// TODO Auto-generated method stub
-		return null;
+		  List<String> empleadosNoasignados = new ArrayList<>();
+
+		    for (Tupla<Integer, Empleado> e : empleados) {
+		        empleadosNoasignados.add(e.getValor2().nombre);
+		    }
+
+		    return empleadosNoasignados.toArray();
 	}
 
 	@Override
@@ -124,8 +158,16 @@ public class HomeSolution implements IHomeSolution{
 
 	@Override
 	public List<Tupla<Integer, String>> empleadosAsignadosAProyecto(Integer numero) {
-		// TODO Auto-generated method stub
-		return null;
+		List<Tupla<Integer,String>> empleadosAsignados = new ArrayList<>();
+		
+		for(Tupla<Integer, Empleado> e :empleados) {
+			Empleado empleado = e.getValor2();
+			if(empleado.legajo == numero) {
+				empleadosAsignados.add(new Tupla<>(empleado.legajo,empleado.nombre));
+			}
+		}
+		
+		return empleadosAsignados;
 	}
 
 	@Override
@@ -136,14 +178,26 @@ public class HomeSolution implements IHomeSolution{
 
 	@Override
 	public Object[] tareasDeUnProyecto(Integer numero) {
-		// TODO Auto-generated method stub
-		return null;
+		Object[] proyecto = null;
+		for(Tupla<Integer, Proyecto> p :proyectos) {
+			if(p.getValor1() == numero) {
+				proyecto = p.getValor2().titulos;
+				System.out.print(proyecto);
+			}
+		}
+		return proyecto;
 	}
 
 	@Override
 	public String consultarDomicilioProyecto(Integer numero) {
-		// TODO Auto-generated method stub
-		return null;
+		String proyecto = null;
+		for(Tupla<Integer, Proyecto> p :proyectos) {
+			if(p.getValor1() == numero) {
+				proyecto = p.getValor2().domicilio;
+				System.out.print(proyecto);
+			}
+		}
+		return proyecto;
 	}
 
 	@Override
@@ -155,7 +209,11 @@ public class HomeSolution implements IHomeSolution{
 	@Override
 	public List<Tupla<Integer, String>> empleados() {
 		// TODO Auto-generated method stub
-		return empleados;
+		List <Tupla<Integer,String>> lista = new ArrayList<>();
+		for(Tupla<Integer, Empleado> e : empleados) {
+			lista.add(new Tupla<>(e.getValor2().legajo,e.getValor2().nombre));
+		}
+		return lista;
 	}
 
 	@Override
