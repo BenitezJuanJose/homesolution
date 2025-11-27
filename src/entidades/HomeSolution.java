@@ -8,19 +8,40 @@ public class HomeSolution implements IHomeSolution{
 	private Integer numeroProyecto = 0 ;
 	private List <Tupla <Integer, Empleado>> empleados = new ArrayList<>();
 	private List <Tupla <Integer, Proyecto>> proyectos = new ArrayList<>();
-
+ 
 	@Override
 	public void registrarEmpleado(String nombre, double valor) throws IllegalArgumentException {
+		 if (nombre == null || nombre.isEmpty()) {
+		        throw new IllegalArgumentException("El nombre del empleado no puede estar vacío."); 
+		    }
+
+		    if (valor <= 0) {
+		        throw new IllegalArgumentException("El valor por hora debe ser mayor que cero.");
+		    }
 		// TODO Auto-generated method stub
 		Empleado empleado = new Empleado(nombre,valor);
 		empleado.legajo=IdEmpleado;
 		empleados.add(new Tupla<>(IdEmpleado,empleado));
 		IdEmpleado++;
 		
+		
+		
 	}
 
 	@Override
 	public void registrarEmpleado(String nombre, double valor, String categoria) throws IllegalArgumentException {
+		  if (nombre == null || nombre.isEmpty()) {
+		        throw new IllegalArgumentException("El nombre del empleado no puede estar vacío.");
+		    }
+
+		    if (valor <= 0) {
+		        throw new IllegalArgumentException("El valor por hora debe ser mayor que cero.");
+		    }
+
+		    if (categoria == null || categoria.isEmpty()) {
+		        throw new IllegalArgumentException("La categoría del empleado no puede estar vacía.");
+		    }
+
 		Empleado empleado = new Empleado(nombre,valor);
 		empleados.add(new Tupla<>(IdEmpleado,empleado));
 		IdEmpleado++;
@@ -29,13 +50,20 @@ public class HomeSolution implements IHomeSolution{
 
 	@Override
 	public void registrarProyecto(String[] titulos, String[] descripcion, double[] dias, String domicilio,
-			String[] cliente, String inicio, String fin) throws IllegalArgumentException {
-		
+			String[] cliente, String inicio, String fin)  {
+		if (inicio == null || fin == null) {
+	        throw new IllegalArgumentException("Las fechas de inicio y fin no pueden ser nulas");
+	    }
+
+	    
+	    if (fin.compareTo(inicio) < 0) {
+	        throw new IllegalArgumentException("La fecha de finalización no puede ser anterior a la de inicio");
+	    }
+
 			Proyecto proyecto = new Proyecto(titulos, descripcion, dias, domicilio, cliente, inicio, fin);
 			proyectos.add(new Tupla<>(numeroProyecto,proyecto));
 			numeroProyecto++;
-			
-		
+
 	}
 
 	@Override
@@ -52,9 +80,12 @@ public class HomeSolution implements IHomeSolution{
 
 	@Override
 	public void asignarResponsableMenosRetraso(Integer numero, String titulo) throws Exception {
-		// TODO Auto-generated method stub
+		  if (empleados.isEmpty()) {
+		        throw new IllegalArgumentException("No hay empleados disponibles para asignar la tarea.");
+		    }
+		  
 		
-	}
+		}
 
 	@Override
 	public void registrarRetrasoEnTarea(Integer numero, String titulo, double cantidadDias)
@@ -78,7 +109,8 @@ public class HomeSolution implements IHomeSolution{
 
 	@Override
 	public void finalizarProyecto(Integer numero, String fin) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
+		String n = numero.toString();
+		
 		
 	}
 
@@ -146,15 +178,30 @@ public class HomeSolution implements IHomeSolution{
 
 	@Override
 	public boolean estaFinalizado(Integer numero) {
-		// TODO Auto-generated method stub
-		return false;
+		  for (Tupla<Integer, Proyecto> p : proyectos) {
+		        if (p.getValor1().equals(numero)) {
+		            return p.getValor2().estado.equals("FINALIZADO");
+		        }
+		    }
+		    return false;
 	}
 
 	@Override
-	public int consultarCantidadRetrasosEmpleado(Integer legajo) {
-		
-		return 0;
+	public int consultarCantidadRetrasosEmpleado(Integer legajo) {  /////////////////////
+		Integer retrasos = 0;
+        for(Tupla<Integer, Empleado> e :empleados) {
+            Empleado empleado = e.getValor2();
+            if(empleado.legajo == legajo) {
+                retrasos = empleado.retraso;
+            }
+        }
+
+
+
+        return retrasos;
 	}
+	
+	
 
 	@Override
 	public List<Tupla<Integer, String>> empleadosAsignadosAProyecto(Integer numero) {
@@ -167,13 +214,21 @@ public class HomeSolution implements IHomeSolution{
 			}
 		}
 		
-		return empleadosAsignados;
+		return empleadosAsignados; 
 	}
 
 	@Override
-	public Object[] tareasProyectoNoAsignadas(Integer numero) {
-		// TODO Auto-generated method stub
-		return null;
+	public Object[] tareasProyectoNoAsignadas(Integer numero) {  //////////////////////
+		Object[] tareasNoAsignadas = null;
+		for(Tupla<Integer, Proyecto> p : proyectos) {
+		  if(p.getValor1().equals(numero)) {
+			  Proyecto proyecto = p.getValor2();
+			  if (!"FINALIZADO".equals(proyecto.estado)) return new Object[0];
+			  else tareasNoAsignadas = proyecto.titulos;  	
+		  }
+		}
+		
+		return tareasNoAsignadas;
 	}
 
 	@Override
@@ -199,12 +254,18 @@ public class HomeSolution implements IHomeSolution{
 		}
 		return proyecto;
 	}
-
 	@Override
 	public boolean tieneRestrasos(Integer legajo) {
-		// TODO Auto-generated method stub
-		return false;
+		for(Tupla<Integer, Empleado> e :empleados) {
+            Empleado empleado = e.getValor2();
+            if(empleado.legajo == legajo) {
+                return empleado.tieneRetraso;
+            }
+        }
+
+	    return false; 
 	}
+
 
 	@Override
 	public List<Tupla<Integer, String>> empleados() {
@@ -216,11 +277,37 @@ public class HomeSolution implements IHomeSolution{
 		return lista;
 	}
 
+	
+	
 	@Override
+	
 	public String consultarProyecto(Integer numero) {
-		// TODO Auto-generated method stub
-		return null;
+	    for (Tupla<Integer, Proyecto> tupla : proyectos) {
+	        if (tupla.getValor1().equals(numero)) {
+	            Proyecto p = tupla.getValor2();
+	            
+	            StringBuilder sb = new StringBuilder();
+	            sb.append("Proyecto N° ").append(numero).append("\n");
+	            sb.append("Domicilio: ").append(p.domicilio).append("\n");
+	            sb.append("Estado: ").append(p.estado).append("\n");
+	            sb.append("Fecha inicio: ").append(p.fechaInicio).append("\n");
+	            sb.append("Fecha finalización: ").append(p.fechaFinalizacion).append("\n");
+	            sb.append("Clientes: ");
+	            for (String c : p.clientes) {
+	                sb.append(c).append(" ");
+	            }
+	            sb.append("\nTareas:\n");
+	            for (String t : p.titulos) {
+	                sb.append("- ").append(t).append("\n");
+	            }
+
+	            return sb.toString();
+	        }
+	    }
+
+	    throw new IllegalArgumentException("No existe proyecto con el número " + numero);
 	}
+
 	
 	
 
